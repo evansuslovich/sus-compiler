@@ -1,0 +1,6 @@
+function print_vars(a,b) {
+  print(a)
+  print(b)
+}
+
+print_vars("a", "b")
