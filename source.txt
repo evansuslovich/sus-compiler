@@ -3,4 +3,4 @@ function print_vars(a,b) {
   print(b)
 }
 
-print_vars("a", "b")
+print_vars(1,2)

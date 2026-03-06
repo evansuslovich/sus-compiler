@@ -3,7 +3,6 @@ class SusCompiler
   require_relative "lexer/lexer"
   require_relative "parser/parser"
 
-
   module Print
     def self.format_arguments(arguments)
       formatted_arguments = ""
@@ -15,6 +14,7 @@ class SusCompiler
     end
 
 
+    # this is fine
     def self.format_code_block(code_block)
       formatted_code_block= ""
       code_block.each do |code|
@@ -24,6 +24,7 @@ class SusCompiler
       formatted_code_block
     end
 
+    # this is so fcnk mechanical
     def self.handle_print_vars(call)
       <<~RUBY
         def #{call[:function_name]}(#{format_arguments(call[:parameters].arguments)})
@@ -44,6 +45,7 @@ class SusCompiler
     content = Lexer.tokenize_file(ARGV[0])
     calls = Parser.analyze(content)
 
+    # this is a huge work in progress!!!
     # squishing
     calls.each do |call|
 
