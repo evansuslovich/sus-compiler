@@ -95,8 +95,3 @@ the arrow may be read as "can have the form". Such a rule is called a production
 
 2.2.3 Parse Trees 
 A parse tree pictorially shows how the start symbol of a grammar derivces a string in the language. If nonterminal A has a production A --> XYZ, then a parse tree may have an interior node labeled A with three children labeled X, Y, and Z, from left to right.
-
-
-
-
-

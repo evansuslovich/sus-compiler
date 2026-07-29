@@ -6,3 +6,4 @@ group :development, :test do
   gem 'pry-byebug'
 end
 # gem "rails"
+gem "rspec"

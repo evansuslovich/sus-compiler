@@ -11,5 +11,9 @@ module Parser
       @name = name
       @value = value
     end
+
+    def view
+      "#{name} = #{value}"
+    end
   end
 end

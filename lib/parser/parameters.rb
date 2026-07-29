@@ -2,19 +2,27 @@ module Parser
   require_relative "parameters"
 
   class Parameters
-    attr_reader :arguments
+    attr_reader :values
 
-    def initialize(arguments)
-      @arguments = validate(arguments)
+    def initialize(values)
+      @values = values.split(",")
     end
+
+
+    def view()
+      format(@values)
+    end
+
 
     private
 
-    def validate(arguments)
-      arguments = arguments.split(",").map do |argument|
-        Parser::Variable.new(argument, nil)
+    def format(arguments)
+      formatted_arguments = ""
+      arguments.each do |argument|
+        formatted_arguments << argument
+        formatted_arguments << ", " unless argument == arguments.last
       end
-      arguments
+      formatted_arguments
     end
   end
 end

@@ -5,7 +5,7 @@ RSpec.describe Parser::Parser do
 
   describe "Variable" do
     it "fails when variable is a ruby_keyword" do
-      Parser::Parser.ruby_keywords.each do |ruby_keyword|
+      Parser.ruby_keywords.each do |ruby_keyword|
         expect { Parser::Variable.new(ruby_keyword, nil) }.to raise_error(SyntaxError, "Unexpected reserved word, #{ruby_keyword}")
       end
     end

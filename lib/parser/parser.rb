@@ -3,46 +3,73 @@ module Parser
   require_relative "parameters"
   require_relative "function"
   require_relative "built-in/function"
+  require_relative "parse_tree"
 
   class CallExpression
-    attr_reader :function_name, :code_block, :parameters, :arguments
+    attr_reader :function_name, :params
 
-    def initialize(function_name:, code_block:, parameters:, arguments:)
+    def initialize(function_name:, params:)
       @function_name = function_name
-      @code_block = code_block
-      @arguments = arguments.split(",")
+      @params = params.gsub('"', "")
     end
+
+    def view
+      puts "#{function_name}(#{params})"
+    end
+
+
+    private
+
+    def format_params
+      formatted_params = ""
+      code_block.each do |code|
+        formatted_code_block << code.view
+        formatted_code_block << "\n" unless code == code_block.last
+      end
+      formatted_code_block
+    end
+
   end
 
-  # https://docs.ruby-lang.org/en/master/syntax/keywords_rdoc.html
-  RUBY_KEYWORDS = Set["__ENCODING__", "__LINE__", "BEGIN", "END", "alias", "and", "begin", "break", "case", "class", "def", "defined?", "do", "else", "elsif", "end", "ensure", "false", "for", "if","in", "module", "next", "nil", "not", "or", "redo", "rescue", "retry", "return", "self", "super", "then", "true", "undef", "unless", "until", "when", "while", "yield"]
-
   def self.ruby_keywords
-    RUBY_KEYWORDS
+    ["__ENCODING__", "__LINE__", "BEGIN", "END", "alias", "and", "begin", "break", "case", "class", "def", "defined?", "do", "else", "elsif", "end", "ensure", "false", "for", "if","in", "module", "next", "nil", "not", "or", "redo", "rescue", "retry", "return", "self", "super", "then", "true", "undef", "unless", "until", "when", "while", "yield"]
   end
 
   def self.analyze(content)
     symbol_tree = {}
-    calls = []
+    # these differ in number regex, number_regex takes any number
+    code = []
 
     token = content.pop
-    while content.length > 0
 
+    while content.length > 0
       case (token)
       when "function"
+        # create function object
         function = Function.new(content)
+        # add to symbol_tree
         symbol_tree[function.name] = function
-      when *symbol_tree.keys
-        arguments = content.pop
-        symbol = symbol_tree[token]
+        # add this to the code
+        code << function
 
-        calls.append(function_name: token, code_block: symbol.block, parameters: symbol.parameters, arguments: arguments)
+      when *symbol_tree.keys
+        # may be an issue for functions that don't have ()
+        params = content.pop
+        code << CallExpression.new(function_name: token, params: params)
       else
-        raise SyntaxError
+        # Instatiating a new variable?
+        equals_operator = content.pop
+        if equals_operator != "="
+          raise SyntaxError, "Expecting = after variable name"
+        end
+
+        node = Parser::ParseTree.parse(content)
+        code << Parser::Variable.new(token, node.compute)
+
       end
       token = content.pop
     end
 
-    calls
+    code
   end
 end
