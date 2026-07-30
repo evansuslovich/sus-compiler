@@ -1,7 +1,7 @@
 require "spec_helper"
 require "parser/parser"
 
-RSpec.describe Parser::Parser do
+RSpec.describe Parser do
 
   describe "Variable" do
     it "fails when variable is a ruby_keyword" do
@@ -20,11 +20,8 @@ RSpec.describe Parser::Parser do
   describe ("Parameters") do
     it "initializes a parameter" do
       parameters = Parser::Parameters.new("a,b")
-      expected_parameters = [Parser::Variable.new("a", nil), Parser::Variable.new("b", nil)]
-      expect(parameters.arguments[0].name).to eq(expected_parameters[0].name)
-      expect(parameters.arguments[0].value).to eq(expected_parameters[0].value)
-      expect(parameters.arguments[1].name).to eq(expected_parameters[1].name)
-      expect(parameters.arguments[1].value).to eq(expected_parameters[1].value)
+      expected_parameters = ["a", "b"]
+      expect(parameters.values).to eq(expected_parameters)
 
     end
   end

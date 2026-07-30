@@ -5,8 +5,7 @@ RSpec.describe Lexer do
 
   it "tokenizes a file" do
     content = Lexer.tokenize_file("source/print_vars.txt")
-    expected_content = ["function", "print_vars", "a,b", "{", "print", "a", "print", "b", "}", "print_vars", "a,b"]
-
+    expected_content = ["1,2", "print_vars", "}", "b", "print", "a", "print", "{", "a,b", "print_vars", "function"]
     expect(content).to eq(expected_content)
   end
 

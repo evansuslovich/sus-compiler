@@ -5,10 +5,8 @@ class SusCompiler
 
 
   def self.main
-    require "pry"; binding.pry
     content = Lexer.tokenize_file(ARGV[0])
     print_output = ARGV[1] == "--output"
-    require "pry"; binding.pry
     all_code = Parser.analyze(content)
 
 
@@ -20,4 +18,4 @@ class SusCompiler
   end
 end
 
-SusCompiler.main
+SusCompiler.main if __FILE__ == $PROGRAM_NAME
