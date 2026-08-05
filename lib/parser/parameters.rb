@@ -5,11 +5,15 @@ module Parser
     attr_reader :values
 
     def initialize(values)
-      @values = values.split(",")
+      if values.is_a?(Array)
+        @values = values
+      else
+        @values = values.split(",")
+      end
     end
 
 
-    def view()
+    def view
       format(@values)
     end
 

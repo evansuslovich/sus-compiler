@@ -3,3 +3,5 @@ I've worked on this project primarily on planes, early Saturday mornings, and wh
 I want to work on ParseTree for calculation of numbers in `source/add_numbers`
 
 Wanna add numbers? You'll only going to use the `+` and `-` operators LOL... for now.
+
+Note from future August 1st, I barely used these notes for ParseTree.

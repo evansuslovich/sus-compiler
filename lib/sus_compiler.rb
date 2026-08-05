@@ -9,7 +9,6 @@ class SusCompiler
     print_output = ARGV[1] == "--output"
     all_code = Parser.analyze(content)
 
-
     if print_output
       all_code.each do |code|
         puts code.view

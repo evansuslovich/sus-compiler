@@ -53,9 +53,10 @@ module Parser
         code << function
 
       when *symbol_tree.keys
-        # may be an issue for functions that don't have ()
-        params = content.pop
-        code << CallExpression.new(function_name: token, params: params)
+        elements = Parser.elements_in_parentheses(content)
+        parameters = Parser::Parameters.new(elements)
+
+        code << CallExpression.new(function_name: token, params: parameters.view)
       else
         # Instatiating a new variable?
         equals_operator = content.pop

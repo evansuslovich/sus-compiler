@@ -1,0 +1,37 @@
+Changing my Lexer:
+
+-      content.split(/[()\s]+/).reverse
++      content.scan(/"[^"]*"|[()]|[^\s()]+/).reverse
+
+
+Original implementation: 
+
+content.split(/[()\s]+/).reverse
+
+split on Regex:
+[...] = within the character set
+()    = paranetheses  
+\s    = white space characters 
++     = matching one or more consistent 
+
+
+This has many problems for example: 
+
+In an IRB:
+'print("hello world")'.split(/[()\s]+/)
+=> ["print", "\"hello", "world\""]
+
+
+
+New Implementation:
+
+Resources - https://ruby-doc.org/stdlib-2.6.1/libdoc/strscan/rdoc/StringScanner.html
+
+content.scan(/"[^"]*"|[()]|[^\s()]+/).reverse
+
+
+"[^"]*" — matches an entire double-quoted string (including the quotes) as a single token, so "the result is: " won't get chopped up by its internal spaces.
+[()] — matches a single ( or ) as its own token.
+[^\s()]+ — matches any other run of non-whitespace, non-paren characters (identifiers, numbers, operators like =, +, -, etc.).
+
+
