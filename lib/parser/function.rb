@@ -1,4 +1,28 @@
 module Parser
+
+  module_function
+  def elements_in_parentheses(content)
+    opening_paran = content.pop
+
+    if opening_paran != "("
+      raise SyntaxError
+    end
+
+    parameter_or_closing_paran = content.pop
+
+    list_of_params = []
+    while parameter_or_closing_paran != ")"
+      list_of_params << parameter_or_closing_paran
+      parameter_or_closing_paran = content.pop
+    end
+
+    if parameter_or_closing_paran != ")"
+      raise SyntaxError
+    end
+
+    list_of_params
+  end
+
   class Function
     attr_reader :name, :parameters, :block
 
@@ -32,26 +56,27 @@ module Parser
 
     class << self
       def validate(content)
-        function_name = content.pop
-        parameters = content.pop
 
-        function_name = validate_function_name(function_name)
-        parameters = validate_parameters(parameters)
+        function_name = validate_function_name(content)
+        parameters = validate_parameters(content)
         code_block = validate_code_block(content)
         return function_name, parameters, code_block
       end
 
       private
 
-      def validate_function_name(function_name)
-        raise SyntaxError if function_name.nil? || Parser.ruby_keywords.include?(function_name)
+      def validate_function_name(content)
+        function_name = content.pop
+
+        if function_name.nil? || Parser.ruby_keywords.include?(function_name)
+          raise SyntaxError
+        end
+
         function_name
       end
 
-      def validate_parameters(parameters)
-        raise SyntaxError if parameters.nil?
-
-        Parameters.new(parameters)
+      def validate_parameters(content)
+        Parameters.new(Parser.elements_in_parentheses(content))
       end
 
       def validate_code_block(code_block)
@@ -65,9 +90,11 @@ module Parser
           # it would be nice to have an abstract handler
           # I can't imagine the amount of functions that we have here?
           if code_line == "print"
-            argument = code_block.pop
+
+            elements = Parser.elements_in_parentheses(code_block)
+            parameters = Parser::Parameters.new(elements)
             # what happens if there are no argument
-            content.append(BuiltIn::Function::Print.new(argument))
+            content.append(BuiltIn::Function::Print.new(parameters.view))
           else
             raise SyntaxError
           end

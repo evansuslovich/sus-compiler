@@ -5,8 +5,10 @@ module Parser
         attr_reader :argument
 
         def initialize(argument)
-          raise ArgumentError if argument.nil?
-          @argument = argument.gsub('"', "")
+          if argument.nil?
+            raise ArgumentError
+          end
+          @argument = argument
         end
 
         def view
