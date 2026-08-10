@@ -40,9 +40,11 @@ module Parser
     # these differ in number regex, number_regex takes any number
     code = []
 
-    token = content.pop
+    line_of_code = content.last
+    token = line_of_code.pop
 
     while content.length > 0
+
       case (token)
       when "function"
         # create function object
@@ -53,22 +55,29 @@ module Parser
         code << function
 
       when *symbol_tree.keys
-        elements = Parser.elements_in_parentheses(content)
+        line_of_code = content.pop
+        elements = Parser.elements_in_parentheses(line_of_code)
         parameters = Parser::Parameters.new(elements)
 
         code << CallExpression.new(function_name: token, params: parameters.view)
+
       else
         # Instatiating a new variable?
-        equals_operator = content.pop
+        line_of_code = content.pop
+        equals_operator = line_of_code.pop
         if equals_operator != "="
           raise SyntaxError, "Expecting = after variable name"
         end
 
-        node = Parser::ParseTree.parse(content)
-        code << Parser::Variable.new(token, node.compute)
+        node = Parser::ParseTree.parse(line_of_code, symbol_tree)
+        variable = Parser::Variable.new(token, node.compute)
 
+        symbol_tree[variable.name] = variable
+        code << variable
       end
-      token = content.pop
+
+      break if content.size == 0
+      token = content.last.pop
     end
 
     code

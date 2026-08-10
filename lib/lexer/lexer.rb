@@ -10,7 +10,9 @@ module Lexer
     end
 
     def scan(content)
-      content.scan(/"[^"]*"|[()]|[^\s()]+/).reverse
+      content.scan(/.+/).map {
+        |c| c.scan(/"[^"]*"|[()]|[^\s()]+/).reverse
+      }.reverse
     end
   end
 end

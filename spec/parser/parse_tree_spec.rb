@@ -1,4 +1,7 @@
 require "spec_helper"
+
+require "parser/parser"
+require "parser/variable"
 require "parser/parse_tree"
 
 RSpec.describe Parser::ParseTree do
@@ -62,8 +65,35 @@ RSpec.describe Parser::ParseTree do
       it "with one number" do
         content = ["1"]
 
-        # does not create ParseTree and returns 1
-        expect(Parser::ParseTree.parse(content)).to eq("1")
+        result = Parser::ParseTree.parse(content)
+        one = Parser::ParseTree::Node.new(ar_op: nil, left: "1", right: nil)
+
+        expect(result.equals_to?(one)).to be true
+      end
+
+      it "with a variable, with three numbers" do
+        content = ["one", "-", "two", "+", "3"]
+
+        #      +
+        #    /   \
+        #   -     3
+        #  / \
+        # one two
+
+        # instatiating bottom-up:
+        three_plus_two = Parser::ParseTree::Node.new(ar_op: "+", left: "3", right: "2")
+        three_plus_two_minus_one = Parser::ParseTree::Node.new(ar_op: "-", left: three_plus_two, right: "1")
+
+        one = Parser::Variable.new("one", "1")
+        two = Parser::Variable.new("two", "2")
+        symbol_tree = {
+          one.name => one,
+          two.name => two
+        }
+
+        result = Parser::ParseTree.parse(content, symbol_tree)
+
+        expect(result.equals_to?(three_plus_two_minus_one)).to be true
       end
 
     end
@@ -72,14 +102,21 @@ RSpec.describe Parser::ParseTree do
       it "when expecting number but received arithemtic_operator" do
         content = ["1", "-", "-", "+", "1"]
 
-        expect { Parser::ParseTree.parse(content) }
+        expect { Parser::ParseTree.parse(content, {}) }
           .to raise_error(SyntaxError, "Expecting a number, received -")
+      end
+
+      it "when expecting number but received uninitalized variable" do
+        content = ["variable"]
+
+        expect { Parser::ParseTree.parse(content, {}) }
+          .to raise_error(SyntaxError, "Expecting a number, received variable")
       end
 
       it "when expecting arithemtic_operator but received number" do
         content = ["1", "-", "1", "1", "1"]
 
-        expect { Parser::ParseTree.parse(content) }
+        expect { Parser::ParseTree.parse(content, {}) }
           .to raise_error(SyntaxError, "Expecting an arithmetic symbol (+,-), received 1")
       end
     end
