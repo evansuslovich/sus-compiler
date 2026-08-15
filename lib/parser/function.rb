@@ -57,9 +57,15 @@ module Parser
     class << self
       def validate(content)
 
-        function_name = validate_function_name(content)
-        parameters = validate_parameters(content)
+        function_header = content.pop
+
+        function_name = validate_function_name(function_header)
+        parameters = validate_parameters(function_header)
+
+        starting_bracket = function_header.pop
+        raise SyntaxError unless starting_bracket == "{"
         code_block = validate_code_block(content)
+
         return function_name, parameters, code_block
       end
 
@@ -80,25 +86,29 @@ module Parser
       end
 
       def validate_code_block(code_block)
-        starting_bracket = code_block.pop
-        raise SyntaxError unless starting_bracket == "{"
+        # get the next line of code
+        line_of_code = code_block.pop
+        # get the token from the line of code
+        token = line_of_code.pop
 
-        code_line = code_block.pop
         content = []
 
-        while code_line != "}" do
+        while token != "}" do
           # it would be nice to have an abstract handler
           # I can't imagine the amount of functions that we have here?
-          if code_line == "print"
-
-            elements = Parser.elements_in_parentheses(code_block)
+          if token == "print"
+            elements = Parser.elements_in_parentheses(line_of_code)
             parameters = Parser::Parameters.new(elements)
             # what happens if there are no argument
             content.append(BuiltIn::Function::Print.new(parameters.view))
           else
             raise SyntaxError
           end
-          code_line = code_block.pop
+
+          # get the next line of code
+          line_of_code = code_block.pop
+          # get the token
+          token = line_of_code.pop
         end
         content
       end

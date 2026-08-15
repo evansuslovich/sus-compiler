@@ -1,0 +1,8 @@
+function print_result(result) {
+  print(result)
+}
+
+
+one = 1
+result = one + 2 - one 
+print_result(result)

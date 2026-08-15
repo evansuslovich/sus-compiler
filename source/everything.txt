@@ -1,0 +1,14 @@
+function hope_this_works(result) {
+  print("I really hope this fucking works")
+  print(result)
+}
+
+
+one = 1 
+two = 2 
+three = 3
+four = 4 
+
+result = one + two + three - four
+
+hope_this_works(result)

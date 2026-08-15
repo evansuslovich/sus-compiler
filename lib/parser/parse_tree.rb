@@ -76,7 +76,7 @@ module Parser
       attr_accessor :right
 
 
-      def initialize(ar_op: nil, left: nil, right:nil)
+      def initialize(ar_op: nil, left: nil, right: nil)
         @ar_op = ar_op
         @left = left
         @right = right
@@ -153,6 +153,11 @@ module Parser
 
 
       def compute
+
+        if single?
+          return left
+        end
+
         case ar_op
         when "+"
           if left.instance_of?(Parser::ParseTree::Node)
@@ -179,7 +184,7 @@ module Parser
       # The algorithm:
       # Instatiate a ParseTree object
 
-      def parse(content)
+      def parse(content, symbol_tree = {})
         list_of_numbers_and_operators = []
         number_or_arithmetic_operator = content.pop
         node = ParseTree::Node.new()
@@ -190,9 +195,11 @@ module Parser
 
         expecting_number = true
 
-        while CALC_REGEX.match?(number_or_arithmetic_operator)
-          expecting_number = validate(expecting_number: expecting_number, number_or_arithmetic_operator: number_or_arithmetic_operator)
-
+        while true
+          if symbol_tree.keys.include?(number_or_arithmetic_operator)
+            number_or_arithmetic_operator = symbol_tree[number_or_arithmetic_operator].value
+          end
+          expecting_number = validate(expecting_number: expecting_number, number_or_arithmetic_operator: number_or_arithmetic_operator, symbol_tree: symbol_tree)
 
           if node.filled?
             node = ParseTree::Node.new(left: node)
@@ -201,31 +208,56 @@ module Parser
             node.insert(number_or_arithmetic_operator)
           end
 
-          break if !CALC_REGEX.match?(content.last)
+          break if end_parsing(content, symbol_tree)
           number_or_arithmetic_operator = content.pop
         end
 
-        if node.single?
-          node.left
-        else
-          node
-        end
+        node
       end
 
       private
 
-      def validate(expecting_number:, number_or_arithmetic_operator:)
+      def end_parsing(content, symbol_tree)
+        # end parsing if:
+        #  - not a number
+        #  - not an arithmetic symbol
+        #  - not a valid variable
+        !CALC_REGEX.match?(content.last) && !is_valid_variable?(content.last, symbol_tree)
+      end
+
+      def validate(expecting_number:, number_or_arithmetic_operator:, symbol_tree:)
         if expecting_number
-          if NUMBER_REGEX.match?(number_or_arithmetic_operator)
+          if is_number?(number_or_arithmetic_operator, symbol_tree)
+            return !expecting_number
+          elsif !NUMBER_REGEX.match?(number_or_arithmetic_operator)
+            return !expecting_number
+          end
+          raise SyntaxError, "Expecting an arithmetic symbol (+,-), received #{number_or_arithmetic_operator}"
+        else
+          if is_ar_op?(number_or_arithmetic_operator)
             return !expecting_number
           else
-            raise SyntaxError, "Expecting a number, received #{number_or_arithmetic_operator}"
+            raise SyntaxError, "Expecting an arithmetic symbol (+,-), received #{number_or_arithmetic_operator}"
           end
-        elsif !NUMBER_REGEX.match?(number_or_arithmetic_operator)
-          return !expecting_number
-        else
-          raise SyntaxError, "Expecting an arithmetic symbol (+,-), received #{number_or_arithmetic_operator}"
         end
+      end
+
+      # so hairy
+      def is_number?(number_or_arithmetic_operator, symbol_tree)
+        if NUMBER_REGEX.match?(number_or_arithmetic_operator) || is_valid_variable?(number_or_arithmetic_operator, symbol_tree)
+          return true
+        end
+        raise SyntaxError, "Expecting a number, received #{number_or_arithmetic_operator}"
+      end
+
+      def is_valid_variable?(possible_variable, symbol_tree)
+        variable = symbol_tree[possible_variable]
+
+        !variable.nil? && NUMBER_REGEX.match?(variable.value)
+      end
+
+      def is_ar_op?(str)
+        str == "+" || str == "-" || str == "*" || str == "/"
       end
 
     end

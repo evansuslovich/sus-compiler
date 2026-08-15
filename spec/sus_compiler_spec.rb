@@ -56,6 +56,20 @@ RSpec.describe SusCompiler do
 				expect(output).to include("result = 2")
 				expect(output).to include("print_result(result)")
 			end
+
+      it "arithmetic_operations_on_variables.txt" do
+        allow(ARGV).to receive(:[]).with(0).and_return("source/arithmetic_operations_on_variables.txt")
+				allow(ARGV).to receive(:[]).with(1).and_return("--output")
+
+				output = capture_stdout { SusCompiler.main }
+
+				expect(output).to include("def print_result(result)")
+				expect(output).to include("puts result")
+				expect(output).to include("end")
+				expect(output).to include("one = 1")
+				expect(output).to include("result = 2")
+				expect(output).to include("print_result(result)")
+			end
 		end
 	end
 end
